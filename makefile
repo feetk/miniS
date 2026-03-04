@@ -11,11 +11,22 @@ LIBFT		 = $(LIBFT_PATH)/libft.a
 SRCS        = main.c \
               lexer.c \
               lexer_2.c \
-			  expander.c \
-			  env.c \
-			  parser.c \
-			  quote.c \
-			  debug.c
+              expander.c \
+              env.c \
+              parser.c \
+              quote.c \
+              debug.c \
+              signals.c \
+              exec_utils.c \
+              exec_utils2.c \
+              exec.c \
+              exec2.c \
+              exec3.c \
+              heredoc.c \
+              builtins.c \
+              builtins2.c \
+              builtins3.c \
+              builtins4.c
 
 OBJS        = $(SRCS:.c=.o)
 

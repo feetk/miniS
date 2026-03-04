@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aganganu <aganganu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dsb <dsb@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/18 15:52:36 by aganganu          #+#    #+#             */
-/*   Updated: 2026/02/17 16:31:49 by aganganu         ###   ########.fr       */
+/*   Updated: 2026/02/19 03:02:10 by dsb              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,10 @@ t_env	*init_env(char **env_array)
 	char	*value;
 
 	i = 0;
-	if (!env_array || env_array[0])
+	if (!env_array || !env_array[0])
 		return (init_minimal_env());
+	// if (!env_array || env_array[0])
+	// 	return (init_minimal_env());
 	env_list = NULL;
 	while (env_array[i])
 	{

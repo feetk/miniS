@@ -3,65 +3,69 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aganganu <aganganu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dsb <dsb@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/11 15:10:31 by aganganu          #+#    #+#             */
-/*   Updated: 2026/02/17 16:38:32 by aganganu         ###   ########.fr       */
+/*   Updated: 2026/02/19 03:37:07 by dsb              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-const char *get_token_type(int type)
+int	g_last_exit = 0;
+
+static void	handle_signal_after(void)
 {
-    if (type == TOKEN_WORD)
-        return ("WORD");
-    else if (type == TOKEN_PIPE)
-        return ("PIPE (|)");
-    else if (type == TOKEN_REDIR_IN)
-        return ("INPUT (<)");
-    else if (type == TOKEN_REDIR_OUT)
-        return ("OUTPUT (>)");
-    else if (type == TOKEN_HEREDOC)
-        return ("HEREDOC (<<)");
-    else if (type == TOKEN_APPEND)
-        return ("APPEND (>>)");
-    return ("UNKNOWN");
+	if (g_signal)
+	{
+		g_last_exit = 128 + g_signal;
+		g_signal = 0;
+	}
+}
+
+static void	run_line(char *line, t_env **env)
+{
+	t_token	*tok;
+	t_cmd	*cmds;
+
+	add_history(line);
+	tok = lexer(line);
+	if (!tok)
+		return ;
+	expand(tok, *env);
+	remove_quotes(tok);
+	cmds = parse_tokens(tok);
+	if (cmds)
+	{
+		g_last_exit = execute(cmds, env);
+		free_cmds(cmds);
+	}
+	free_tok(tok);
 }
 
 int	main(int ac, char **av, char **env)
 {
+	t_env	*env_list;
+	char	*line;
+
 	(void)ac;
 	(void)av;
-	t_token	*tok;
-	char	*line;
-    t_cmd   *cmds;
-    t_env   *env_list;
-
-    env_list = init_env(env);
+	env_list = init_env(env);
 	while (1)
 	{
+		setup_signals_interactive();
 		line = readline("minishell$> ");
-        if (!line)
-        {
-            printf("exit\n");
-            break;
-        }
+		if (!line)
+		{
+			write(1, "exit\n", 5);
+			break ;
+		}
+		handle_signal_after();
 		if (line[0] != '\0')
-       	{
-        	add_history(line);
-        	tok = lexer(line);
-            if (tok)
-            {
-                expand(tok, env_list);
-                remove_quotes(tok);
-                cmds = parse_tokens(tok);
-                print_cmds(cmds);
-                free_cmds(cmds);
-                free_tok(tok);
-            }
-        }
+			run_line(line, &env_list);
 		free(line);
 	}
-    return (0);
+	free_env(env_list);
+	rl_clear_history();
+	return (g_last_exit);
 }

@@ -3,28 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aganganu <aganganu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dsb <dsb@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/11 12:39:19 by aganganu          #+#    #+#             */
-/*   Updated: 2026/02/17 16:31:31 by aganganu         ###   ########.fr       */
+/*   Updated: 2026/02/19 03:37:07 by dsb              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-#include "libft/libft.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <readline/history.h>
-#include <readline/readline.h>
+# include "libft/libft.h"
+# include <stdlib.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <sys/wait.h>
+# include <signal.h>
+# include <sys/stat.h>
+# include <string.h>
+# include <errno.h>
+# include <stdbool.h>
+# include <readline/history.h>
+# include <readline/readline.h>
 
 typedef enum e_token_type
 {
@@ -95,8 +95,53 @@ t_redir	*redir_new(t_token_type type, char *file);
 void	redir_add_back(t_redir **redir_list, t_redir *new_redir);
 void	add_redir(t_cmd *cmd, t_token **tok_ptr);
 t_cmd	*parse_tokens(t_token *tok);
-//debug
 void	print_cmds(t_cmd *cmd);
 void	free_cmds(t_cmd *cmd);
+
+typedef struct s_pctx
+{
+	int	**pipes;
+	int	n;
+	int	i;
+}		t_pctx;
+
+extern int	g_signal;
+extern int	g_last_exit;
+
+void	handle_sigint(int sig);
+void	setup_signals_interactive(void);
+void	setup_signals_child(void);
+void	setup_signals_heredoc(void);
+
+char	*env_to_str(t_env *node);
+char	**build_env(t_env *env);
+char	*find_path(char *cmd, t_env *env);
+void	free_env(t_env *env);
+int		apply_redirs(t_redir *redir);
+int		builtin_with_redir(t_cmd *cmd, t_env **env);
+
+int		heredoc_fd(char *delimiter);
+
+void	handle_heredocs(t_cmd *cmd, t_env **env);
+void	exec_cmd(t_cmd *cmd, t_env **env);
+int		exec_single(t_cmd *cmd, t_env **env);
+int		exec_pipeline(t_cmd *cmds, t_env **env);
+int		**alloc_pipes(int n);
+void	close_pipes(int **pipes, int n);
+int		execute(t_cmd *cmds, t_env **env);
+
+int		is_builtin(char *cmd);
+int		run_builtin(t_cmd *cmd, t_env **env);
+int		ft_echo(t_cmd *cmd);
+int		ft_pwd(void);
+int		ft_env(t_env *env);
+int		ft_exit(t_cmd *cmd);
+int		ft_cd(t_cmd *cmd, t_env **env);
+int		ft_unset(t_cmd *cmd, t_env **env);
+int		ft_export(t_cmd *cmd, t_env **env);
+int		export_one(char *arg, t_env **env);
+void	print_export(t_env *env);
+void	update_env(t_env *env, char *key, char *val);
+void	env_set(t_env **env, char *key, char *val);
 
 #endif
