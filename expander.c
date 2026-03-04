@@ -74,15 +74,24 @@ void	replace_var(char **str_ptr, int *index, t_env *env)
 	char	*var_name;
 	char	*value;
 	char	*new_str;
+	char	*exit_str;
 
 	len_var_name = get_var_len(*str_ptr + (*index + 1));
 	var_name = ft_substr(*str_ptr, *index + 1, len_var_name);
-	value = get_env_value(var_name, env);
+	exit_str = NULL;
+	if (var_name && var_name[0] == '?' && var_name[1] == '\0')
+	{
+		exit_str = ft_itoa(g_last_exit);
+		value = exit_str;
+	}
+	else
+		value = get_env_value(var_name, env);
 	free(var_name);
 	new_str = create_s(*str_ptr, value, *index, len_var_name);
 	free(*str_ptr);
 	*str_ptr = new_str;
 	*index += ft_strlen(value) - 1;
+	free(exit_str);
 }
 
 void	expand(t_token *tok, t_env *env)
